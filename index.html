@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medieval Calculator</title>
+    <link rel="icon" href="favicon.ico"/>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #202225;
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: beige;
+        }
+        
+        .container {
+            margin-right: 20%;
+            background-color: rgba(0, 0, 0, 0);
+        }
+        
+        .calculator {
+            background-color: #2f3136;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .results {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 300px;
+            background-color: #2f3136;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            font-weight: bold;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .title {
+            background-color: #292b2f;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        input[type="number"] {
+            color: beige;
+            background-color: #292b2f;
+            padding: 10px;
+            border: 1px solid #2f3136;
+            border-radius: 5px;
+            width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h2 style="text-align: center;">Current Farms</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="coal_mines">How many coal mines do you have?</label>
+            <input type="number" id="coal_mines" name="coal_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="iron_mines">How many iron mines do you have?</label>
+            <input type="number" id="iron_mines" name="iron_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="gold_mines">How many gold mines do you have?</label>
+            <input type="number" id="gold_mines" name="gold_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="copper_mines">How many copper mines do you have?</label>
+            <input type="number" id="copper_mines" name="copper_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="diamond_mines">How many diamond mines do you have?</label>
+            <input type="number" id="diamond_mines" name="diamond_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="wheat_farms">How many wheat farms do you have?</label>
+            <input type="number" id="wheat_farms" name="wheat_farms" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        
+        <div class="title">
+            <h2 style="text-align: center;">Current Ressources</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="coal">How much coal do you have?</label>
+            <input type="number" id="coal" name="coal" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="iron_bars">How many iron bars do you have?</label>
+            <input type="number" id="iron_bars" name="iron_bars" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="gold_bars">How many gold bars do you have?</label>
+            <input type="number" id="gold_bars" name="gold_bars" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="copper_bars">How many copper bars do you have?</label>
+            <input type="number" id="copper_bars" name="copper_bars" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="diamonds">How many diamonds do you have?</label>
+            <input type="number" id="diamonds" name="diamonds" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="wheat">How much wheat do you have?</label>
+            <input type="number" id="wheat" name="wheat" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+
+        <div class="title">
+            <h2 style="text-align: center;">Current Ores</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="iron_ore">How much iron ore do you have?</label>
+            <input type="number" id="iron_ore" name="iron_ore" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="gold_ore">How much gold ore do you have?</label>
+            <input type="number" id="gold_ore" name="gold_ore" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="copper_ore">How much copper ore do you have?</label>
+            <input type="number" id="copper_ore" name="copper_ore" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+
+        <div class="title">
+            <h2 style="text-align: center;">Extra Information</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="beds">How many beds (workers) do you have?</label>
+            <input type="number" id="beds" name="beds" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="farms">How many workplaces (farms) do you have?</label>
+            <input type="number" id="farms" name="farms" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <br>
+    </div>
+        <div class="results">
+            <div id="result">Coal: 0<br><br>Iron: 0<br><br>Gold: 0<br><br>Copper: 0<br><br>Diamond: 0<br><br>Wheat: 0</div>
+        </div>
+    <script>
+        const result = document.getElementById('result')
+
+        const coal_mines_box = document.getElementById('coal_mines')
+        const iron_mines_box = document.getElementById('iron_mines')
+        const gold_mines_box = document.getElementById('gold_mines')
+        const copper_mines_box = document.getElementById('copper_mines')
+        const diamond_mines_box = document.getElementById('diamond_mines')
+        const wheat_farms_box = document.getElementById('wheat_farms')
+
+        const iron_ore_box = document.getElementById('iron_ore')
+        const gold_ore_box = document.getElementById('gold_ore')
+        const copper_ore_box = document.getElementById('copper_ore')
+
+        const coal_box = document.getElementById('coal')
+        const iron_bars_box = document.getElementById('iron_bars')
+        const gold_bars_box = document.getElementById('gold_bars')
+        const copper_bars_box = document.getElementById('copper_bars')
+        const diamonds_box = document.getElementById('diamonds')
+        const wheat_box = document.getElementById('wheat')
+
+        const beds_box = document.getElementById('beds')
+        const farms_box = document.getElementById('farms')
+        function buttonclick() {
+            var coalMines = parseInt(coal_mines_box.value) * 64;
+            var ironMines = parseInt(iron_mines_box.value) * 64;
+            var goldMines = parseInt(gold_mines_box.value) * 64;
+            var copperMines = parseInt(copper_mines_box.value) * 64;
+            var diamondMines = parseInt(diamond_mines_box.value) * 64;
+            var wheatFarms = parseInt(wheat_farms_box.value) * 64;
+
+            var ironOre = parseInt(iron_ore_box.value) + ironMines;
+            var goldOre = parseInt(gold_ore_box.value) + goldMines;
+            var copperOre = parseInt(copper_ore_box.value) + copperMines;
+
+            var coal = parseInt(coal_box.value) + coalMines;
+            var ironBars = parseInt(iron_bars_box.value);
+            var goldBars = parseInt(gold_bars_box.value);
+            var copperBars = parseInt(copper_bars_box.value);
+            var diamonds = parseInt(diamonds_box.value) + diamondMines;
+            var wheat = parseInt(wheat_box.value) + wheatFarms;
+
+            var beds = parseInt(beds_box.value);
+            var farms = parseInt(farms_box.value);
+
+            coal -= (ironOre + goldOre + copperOre) / 10
+            ironBars = ironOre
+            goldBars = goldOre
+            copperBars = copperOre
+
+            wheat -= beds * 3
+
+            ironBars -= farms
+
+            result.innerHTML = "Coal: " + coal + "<br><br>" + "Iron: " + ironBars + "<br><br>" + "Gold: " + goldBars + "<br><br>" + "Copper: " + copperBars + "<br><br>" + "Diamonds: " + diamonds + "<br><br>" + "Wheat: " + wheat
+        }
+    </script>
+</body>
+</html>
+
