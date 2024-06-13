@@ -23,7 +23,7 @@ const farms_box = document.getElementById('farms')
 function buttonclick() {
     var coalMines = parseInt(coal_mines_box.value) * 64;
     var ironMines = parseInt(iron_mines_box.value) * 64;
-    var goldMines = parseInt(gold_mines_box.value) * 64;
+    var goldMines = parseInt(gold_mines_box.value) * 64;  
     var copperMines = parseInt(copper_mines_box.value) * 64;
     var diamondMines = parseInt(diamond_mines_box.value) * 64;
     var wheatFarms = parseInt(wheat_farms_box.value) * 64;
@@ -42,7 +42,7 @@ function buttonclick() {
     var beds = parseInt(beds_box.value);
     var farms = parseInt(farms_box.value);
 
-    coal -= (ironOre + goldOre + copperOre) / 10
+    coal = Math.ceil(coal - (ironOre + goldOre + copperOre) / 10)
     ironBars = ironOre
     goldBars = goldOre
     copperBars = copperOre
