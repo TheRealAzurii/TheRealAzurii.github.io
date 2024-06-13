@@ -51,5 +51,41 @@ function buttonclick() {
 
     ironBars -= farms
 
-    result.innerHTML = "Coal: " + coal + "<br><br>" + "Iron: " + ironBars + "<br><br>" + "Gold: " + goldBars + "<br><br>" + "Copper: " + copperBars + "<br><br>" + "Diamonds: " + diamonds + "<br><br>" + "Wheat: " + wheat
+    if (coal > 0) {
+        coal = "<span class='good'>" + "+" + coal + "</span>"
+    } else if (coal < 0) {
+        coal = "<span class='bad'>" + coal + "</span>"
+    }
+
+    if (ironBars > 0) {
+        ironBars = "<span class='good'>" + "+" + ironBars + "</span>"
+    } else if (ironBars < 0) {
+        ironBars = "<span class='bad'>" + ironBars + "</span>"
+    }
+
+    if (goldBars > 0) {
+        goldBars = "<span class='good'>" + "+" + goldBars + "</span>"
+    } else if (goldBars < 0) {
+        goldBars = "<span class='bad'>" + goldBars + "</span>"
+    }
+
+    if (copperBars > 0) {
+        copperBars = "<span class='good'>" + "+" + copperBars + "</span>" 
+    } else if (copperBars < 0) {
+        copperBars = "<span class='bad'>" + copperBars + "</span>"
+    }
+
+    if (diamonds > 0) {
+        diamonds = "<span class='good'>" + "+" + diamonds + "</span>"
+    } else if (diamonds < 0) {
+        diamonds = "<span class='bad'>" + diamonds + "</span>"
+    }
+
+    if (wheat > 0) {
+        wheat = "<span class='good'>" + "+" + wheat + "</span>"
+    } else if (wheat < 0) {
+        wheat = "<span class='bad'>" + wheat + "</span>"
+    }
+
+    result.innerHTML = "Coal: &nbsp;" + coal + "<br><br>" + "Iron: &nbsp;" + ironBars + "<br><br>" + "Gold: &nbsp;" + goldBars + "<br><br>" + "Copper: &nbsp;" + copperBars + "<br><br>" + "Diamonds: &nbsp;" + diamonds + "<br><br>" + "Wheat: &nbsp;" + wheat
 }
