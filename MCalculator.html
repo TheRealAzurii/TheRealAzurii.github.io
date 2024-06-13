@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="MCstyle.css" />
+    <link rel="icon" href="data\MCfavicon.ico"/>
+    <title>Medieval Calculator</title>
+</head>
+<body>
+    <div class="container">
+        <div class="title">
+            <h2 style="text-align: center;">Current Farms</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="coal_mines">How many coal mines do you have?</label>
+            <input type="number" id="coal_mines" name="coal_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="iron_mines">How many iron mines do you have?</label>
+            <input type="number" id="iron_mines" name="iron_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="gold_mines">How many gold mines do you have?</label>
+            <input type="number" id="gold_mines" name="gold_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="copper_mines">How many copper mines do you have?</label>
+            <input type="number" id="copper_mines" name="copper_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="diamond_mines">How many diamond mines do you have?</label>
+            <input type="number" id="diamond_mines" name="diamond_mines" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="wheat_farms">How many wheat farms do you have?</label>
+            <input type="number" id="wheat_farms" name="wheat_farms" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        
+        <div class="title">
+            <h2 style="text-align: center;">Current Ressources</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="coal">How much coal do you have?</label>
+            <input type="number" id="coal" name="coal" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="iron_bars">How many iron bars do you have?</label>
+            <input type="number" id="iron_bars" name="iron_bars" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="gold_bars">How many gold bars do you have?</label>
+            <input type="number" id="gold_bars" name="gold_bars" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="copper_bars">How many copper bars do you have?</label>
+            <input type="number" id="copper_bars" name="copper_bars" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="diamonds">How many diamonds do you have?</label>
+            <input type="number" id="diamonds" name="diamonds" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="wheat">How much wheat do you have?</label>
+            <input type="number" id="wheat" name="wheat" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+
+        <div class="title">
+            <h2 style="text-align: center;">Current Ores</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="iron_ore">How much iron ore do you have?</label>
+            <input type="number" id="iron_ore" name="iron_ore" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="gold_ore">How much gold ore do you have?</label>
+            <input type="number" id="gold_ore" name="gold_ore" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="copper_ore">How much copper ore do you have?</label>
+            <input type="number" id="copper_ore" name="copper_ore" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+
+        <div class="title">
+            <h2 style="text-align: center;">Extra Information</h2>
+        </div>
+
+        <div class="calculator">
+            <label for="beds">How many beds (workers) do you have?</label>
+            <input type="number" id="beds" name="beds" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="farms">How many workplaces (farms) do you have?</label>
+            <input type="number" id="farms" name="farms" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <br>
+    </div>
+        <div class="results">
+            <div id="result">Coal: 0<br><br>Iron: 0<br><br>Gold: 0<br><br>Copper: 0<br><br>Diamond: 0<br><br>Wheat: 0</div>
+        </div>
+</body>
+<script src="MCindex.js"></script>
+</html>
