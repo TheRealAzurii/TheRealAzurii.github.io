@@ -21,12 +21,12 @@ const wheat_box = document.getElementById('wheat')
 const beds_box = document.getElementById('beds')
 const farms_box = document.getElementById('farms')
 function buttonclick() {
-    var coalMines = parseInt(coal_mines_box.value) * 64;
-    var ironMines = parseInt(iron_mines_box.value) * 64;
-    var goldMines = parseInt(gold_mines_box.value) * 64;  
-    var copperMines = parseInt(copper_mines_box.value) * 64;
-    var diamondMines = parseInt(diamond_mines_box.value) * 64;
-    var wheatFarms = parseInt(wheat_farms_box.value) * 64;
+    var coalMines = parseInt(coal_mines_box.value) * 21;
+    var ironMines = parseInt(iron_mines_box.value) * 21;
+    var goldMines = parseInt(gold_mines_box.value) * 21;  
+    var copperMines = parseInt(copper_mines_box.value) * 21;
+    var diamondMines = parseInt(diamond_mines_box.value) * 21;
+    var wheatFarms = parseInt(wheat_farms_box.value) * 21;
 
     var ironOre = parseInt(iron_ore_box.value) + ironMines;
     var goldOre = parseInt(gold_ore_box.value) + goldMines;
