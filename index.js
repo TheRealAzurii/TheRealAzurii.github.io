@@ -6,6 +6,8 @@ const gold_mines_box = document.getElementById('gold_mines')
 const copper_mines_box = document.getElementById('copper_mines')
 const diamond_mines_box = document.getElementById('diamond_mines')
 const wheat_farms_box = document.getElementById('wheat_farms')
+const log_farms_box = document.getElementById('log_farms')
+const saw_mills_box = document.getElementById('saw_mills')
 
 const iron_ore_box = document.getElementById('iron_ore')
 const gold_ore_box = document.getElementById('gold_ore')
@@ -17,9 +19,12 @@ const gold_bars_box = document.getElementById('gold_bars')
 const copper_bars_box = document.getElementById('copper_bars')
 const diamonds_box = document.getElementById('diamonds')
 const wheat_box = document.getElementById('wheat')
+const log_box = document.getElementById('logs')
+const wood_box = document.getElementById('wood')
 
 const beds_box = document.getElementById('beds')
 const farms_box = document.getElementById('farms')
+
 function buttonclick() {
     var coalMines = parseInt(coal_mines_box.value) * 21;
     var ironMines = parseInt(iron_mines_box.value) * 21;
@@ -27,6 +32,8 @@ function buttonclick() {
     var copperMines = parseInt(copper_mines_box.value) * 21;
     var diamondMines = parseInt(diamond_mines_box.value) * 21;
     var wheatFarms = parseInt(wheat_farms_box.value) * 21;
+    var logFarms = parseInt(log_farms_box.value) * 21;
+    var sawMillsCapacity = parseInt(saw_mills_box.value) * 32;
 
     var ironOre = parseInt(iron_ore_box.value) + ironMines;
     var goldOre = parseInt(gold_ore_box.value) + goldMines;
@@ -38,54 +45,85 @@ function buttonclick() {
     var copperBars = parseInt(copper_bars_box.value);
     var diamonds = parseInt(diamonds_box.value) + diamondMines;
     var wheat = parseInt(wheat_box.value) + wheatFarms;
+    var logs = parseInt(log_box.value) + logFarms;
+    var wood = parseInt(wood_box.value);
 
     var beds = parseInt(beds_box.value);
     var farms = parseInt(farms_box.value);
 
-    coal = Math.ceil(coal - (ironOre + goldOre + copperOre) / 10)
-    ironBars = ironOre
-    goldBars = goldOre
-    copperBars = copperOre
+    coal = Math.ceil(coal - (ironOre + goldOre + copperOre) / 10);
+    ironBars = ironOre;
+    goldBars = goldOre;
+    copperBars = copperOre;
 
-    wheat -= beds * 3
+    wheat -= beds * 3;
 
-    ironBars -= farms
+    copperBars -= farms * 4;
+    wood -= farms * 5;
+
+    if (logs <= sawMillsCapacity) {
+        wood += logs * 3;
+        logs = 0;
+    } else {
+        wood += sawMillsCapacity * 3;
+        logs -= sawMillsCapacity;
+    }
 
     if (coal > 0) {
-        coal = "<span class='good'>" + "+" + coal + "</span>"
+        coal = "<span class='good'> +" + coal + "</span>"
     } else if (coal < 0) {
         coal = "<span class='bad'>" + coal + "</span>"
     }
 
     if (ironBars > 0) {
-        ironBars = "<span class='good'>" + "+" + ironBars + "</span>"
+        ironBars = "<span class='good'> +" + ironBars + "</span>"
     } else if (ironBars < 0) {
         ironBars = "<span class='bad'>" + ironBars + "</span>"
     }
 
     if (goldBars > 0) {
-        goldBars = "<span class='good'>" + "+" + goldBars + "</span>"
+        goldBars = "<span class='good'> +" + goldBars + "</span>"
     } else if (goldBars < 0) {
         goldBars = "<span class='bad'>" + goldBars + "</span>"
     }
 
     if (copperBars > 0) {
-        copperBars = "<span class='good'>" + "+" + copperBars + "</span>" 
+        copperBars = "<span class='good'> +" + copperBars + "</span>" 
     } else if (copperBars < 0) {
         copperBars = "<span class='bad'>" + copperBars + "</span>"
     }
 
     if (diamonds > 0) {
-        diamonds = "<span class='good'>" + "+" + diamonds + "</span>"
+        diamonds = "<span class='good'> +" + diamonds + "</span>"
     } else if (diamonds < 0) {
         diamonds = "<span class='bad'>" + diamonds + "</span>"
     }
 
     if (wheat > 0) {
-        wheat = "<span class='good'>" + "+" + wheat + "</span>"
+        wheat = "<span class='good'> +" + wheat + "</span>"
     } else if (wheat < 0) {
         wheat = "<span class='bad'>" + wheat + "</span>"
     }
 
-    result.innerHTML = "Coal: &nbsp;" + coal + "<br><br>" + "Iron: &nbsp;" + ironBars + "<br><br>" + "Gold: &nbsp;" + goldBars + "<br><br>" + "Copper: &nbsp;" + copperBars + "<br><br>" + "Diamonds: &nbsp;" + diamonds + "<br><br>" + "Wheat: &nbsp;" + wheat
+    if (logs > 0) {
+        logs = "<span class='good'> +" + logs + "</span>"
+    } else if (logs < 0) {
+        logs = "<span class='bad'>" + logs + "</span>"
+    }
+
+    if (wood > 0) {
+        wood = "<span class='good'> +" + wood + "</span>"
+    } else if (wood < 0) {
+        wood = "<span class='bad'>" + wood + "</span>"
+    }
+
+    result.innerHTML =
+    "Coal: &nbsp;" +coal + "<br><br>" +
+    "Iron: &nbsp;" + ironBars + "<br><br>" +
+    "Gold: &nbsp;" + goldBars + "<br><br>" +
+    "Copper: &nbsp;" + copperBars + "<br><br>" +
+    "Diamonds: &nbsp;" + diamonds + "<br><br>" +
+    "Wheat: &nbsp;" + wheat + "<br><br>" +
+    "Logs: &nbsp;" + logs + "<br><br>" +
+    "Planks: &nbsp;" + wood;
 }

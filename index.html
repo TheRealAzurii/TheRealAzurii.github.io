@@ -10,7 +10,7 @@
 <body>
     <div class="container">
         <div class="title">
-            <h2 style="text-align: center;">Current Farms</h2>
+            <h2 style="text-align: center;">Current Workspaces</h2>
         </div>
 
         <div class="calculator">
@@ -36,6 +36,14 @@
         <div class="calculator">
             <label for="wheat_farms">How many wheat farms do you have?</label>
             <input type="number" id="wheat_farms" name="wheat_farms" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="log_farms">How many log farms do you have?</label>
+            <input type="number" id="log_farms" name="log_farms" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
+        <div class="calculator">
+            <label for="saw_mills">How many sawmills do you have?</label>
+            <input type="number" id="saw_mills" name="saw_mills" onkeyup="buttonclick()" min="0" value="0" required>
         </div>
         
         <div class="title">
@@ -66,11 +74,14 @@
             <label for="wheat">How much wheat do you have?</label>
             <input type="number" id="wheat" name="wheat" onkeyup="buttonclick()" min="0" value="0" required>
         </div>
-
-        <div class="title">
-            <h2 style="text-align: center;">Current Ores</h2>
+        <div class="calculator">
+            <label for="logs">How many logs (any type) do you have?</label>
+            <input type="number" id="logs" name="logs" onkeyup="buttonclick()" min="0" value="0" required>
         </div>
-
+        <div class="calculator">
+            <label for="wood">How many wood planks (any type) do you have?</label>
+            <input type="number" id="wood" name="wood" onkeyup="buttonclick()" min="0" value="0" required>
+        </div>
         <div class="calculator">
             <label for="iron_ore">How much iron ore do you have?</label>
             <input type="number" id="iron_ore" name="iron_ore" onkeyup="buttonclick()" min="0" value="0" required>
@@ -93,13 +104,13 @@
             <input type="number" id="beds" name="beds" onkeyup="buttonclick()" min="0" value="0" required>
         </div>
         <div class="calculator">
-            <label for="farms">How many workplaces (farms) do you have?</label>
+            <label for="farms">How many workspaces (farms) do you have?</label>
             <input type="number" id="farms" name="farms" onkeyup="buttonclick()" min="0" value="0" required>
         </div>
         <br>
     </div>
         <div class="results">
-            <div id="result">Coal: &nbsp;0<br><br>Iron: &nbsp;0<br><br>Gold: &nbsp;0<br><br>Copper: &nbsp;0<br><br>Diamonds: &nbsp;0<br><br>Wheat: &nbsp;0</div>
+            <div id="result">Coal: &nbsp;0<br><br>Iron: &nbsp;0<br><br>Gold: &nbsp;0<br><br>Copper: &nbsp;0<br><br>Diamonds: &nbsp;0<br><br>Wheat: &nbsp;0<br><br>Logs: &nbsp;0<br><br>Planks: &nbsp;0</div>
         </div>
 </body>
 <script src="index.js"></script>
