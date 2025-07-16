@@ -1,0 +1,224 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    color: beige;
+    background-attachment: fixed;
+    background-size: 100% 100%;
+    background-color: #292b2f;
+    transition: background-image 5s ease-in-out;
+}
+
+.container {
+    margin-right: 0%;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.calculator {
+    background-color: rgb(47,49,54);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.05s ease-in-out;
+}
+
+.calculator:hover {
+    transform: scale(1.05);
+}
+
+#results {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 300px;
+    background-color: rgb(47,49,54);
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#inputs {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 300px;
+    background-color: rgb(47,49,54);
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    font-weight: bold;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.title {
+    background-color: #292b2f;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 40px;
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.good {
+    color: rgb(0, 173, 0);
+}
+
+.bad {
+    color: rgb(121, 0, 0);
+}
+
+label {
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+input {
+    color: beige;
+    background-color: #292b2f;
+    padding: 10px;
+    border: 1px solid rgb(47,49,54);
+    border-radius: 5px;
+    width: 100px;
+    transition: border .2s ease-in-out;
+}
+
+input:hover {
+    border: 1px solid #3d4049;
+}
+
+button {
+    color: beige;
+    background-color: #656970;
+    padding: 10px;
+    border: 1px solid #3d4049;
+    border-radius: 5px;
+    width: 100px;
+    cursor: pointer;
+    transition: background-color, transform 0.05s ease-in-out;
+}
+
+button:hover {
+    background-color: #4d5057;
+    transform: scale(1.05);
+    transition: background-color 0.05s ease-in-out;
+}
+
+button:active {
+    background-color: #3d4049;
+    transform: scale(0.95);
+    transition: background-color 0.05s ease-in-out;
+}
+
+.code_button {
+    margin: 10px;
+}
+
+input[type="file"] {
+    color: beige;
+    background-color: #292b2f;
+    padding: 10px;
+    border: 1px solid rgb(47,49,54);
+    border-radius: 5px;
+    width: 80%;
+    transition: border .2s ease-in-out;
+}
+
+input[type="file"]:hover {
+    border: 1px solid #3d4049;
+}
+
+.image {
+    height: 20px;
+    vertical-align: bottom;
+    margin-bottom: 1px;
+}
+
+#bottom {
+    position: fixed;
+    bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+#toggle_background {
+    margin-right: 10px;
+}
+
+#background_slider {
+    visibility: hidden;
+}
+
+#slider_title {
+    visibility: hidden;
+}
+
+#kingdom {
+    visibility : 'hidden';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    height: 180px;
+    font-size: 50px;
+}
+
+#city {
+    visibility : 'hidden';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    height: 110px;
+    font-size: 40px;
+}
+
+#place {
+    visibility : 'hidden';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    height: 50px;
+    font-size: 30px;
+}
+
+#screenshots_info {
+    visibility: visible;
+}
+
+/* Styling for the scroll bar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #292b2f; 
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #656970; 
+    border-radius: 5px;
+    box-shadow: inset 0px 0px 10px #3d4049;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3d4049; 
+    box-shadow: inset 0px 0px 15px #30333a;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: #3d4049; 
+    box-shadow: inset 0px 0px 15px #30333a;
+}
