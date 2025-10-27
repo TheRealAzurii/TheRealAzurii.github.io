@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Frequency</title>
+    <link rel="stylesheet" href="../css/style.css"/>
+    <link rel="stylesheet" href="../css/navigationBar.css">
+    <link rel="stylesheet" href="../css/frequencyEncoder.css"/>
+  </head>
+  <body>
+    <section class="topNav">
+      <a href="index.html">Home</a>
+      <a class="active" href="frequencyEncoder.html"> Frequency </a>
+      <a href="minecraftMedievalCalculator.html"> Calculator </a>
+      <a href="https://github.com/LeyZox12/Divergence/tree/main"> Divergence </a>
+    </section>
+
+    <div class="content">
+      <div class="encoder-ui">
+        <input type="text" id="hidden-input" style="position:absolute; opacity:0; pointer-events:none;">
+
+        <div class="message-input">
+          <input type="text" id="new-message" autocapitalize="off" autocorrect="off" autocomplete="off">
+          <input type="number" id="new-frequency" min="1" max="100" autocapitalize="off" autocorrect="off" autocomplete="off">
+          <button id="add-message">Add</button>
+        </div>
+
+        <div class="messages-list" id="messages-list"></div>
+        <button id="copy-text">Copy</button>
+        <div id="encoding-sheet" aria-label="Encoding sheet"></div>
+      </div>
+    </div>
+
+    <script src="../js/frequencyEncoder.js"></script>
+  </body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Calculator</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <link rel="stylesheet" href="../css/navigationBar.css">
+    <link rel="stylesheet" href="../css/minecraftMedievalCalculator.css" />
+  </head>
+  <body>
+    <section class="topNav">
+      <a href="index.html">Home</a>
+      <a href="frequencyEncoder.html"> Frequency </a>
+      <a class="active" href="minecraftMedievalCalculator.html"> Calculator </a>
+      <a href="https://github.com/LeyZox12/Divergence/tree/main"> Divergence </a>
+    </section>
+
+    <div class="content">
+      <div class="calculator-ui">
+        <div class="import-section">
+          <input
+            type="text"
+            id="input_code"
+            autocapitalize="off"
+            autocorrect="off"
+            autocomplete="off"
+          />
+          <button id="confirm_code">Import</button>
+        </div>
+
+        <div class="section-list">
+
+          <section class="section-block">
+            <h2 class="section-header">Current Workspaces</h2>
+            <div class="section-content grid-two">
+              <div class="calculator"><label for="coal_mines">Coal Mines</label><input type="number" id="coal_mines" min="0" value="0"></div>
+              <div class="calculator"><label for="iron_mines">Iron Mines</label><input type="number" id="iron_mines" min="0" value="0"></div>
+              <div class="calculator"><label for="gold_mines">Gold Mines</label><input type="number" id="gold_mines" min="0" value="0"></div>
+              <div class="calculator"><label for="copper_mines">Copper Mines</label><input type="number" id="copper_mines" min="0" value="0"></div>
+              <div class="calculator"><label for="diamond_mines">Diamond Mines</label><input type="number" id="diamond_mines" min="0" value="0"></div>
+              <div class="calculator"><label for="wheat_farms">Wheat Farms</label><input type="number" id="wheat_farms" min="0" value="0"></div>
+              <div class="calculator"><label for="log_farms">Log Farms</label><input type="number" id="log_farms" min="0" value="0"></div>
+              <div class="calculator"><label for="saw_mills">Sawmills</label><input type="number" id="saw_mills" min="0" value="0"></div>
+              <div class="calculator"><label for="wind_mills">Windmills</label><input type="number" id="wind_mills" min="0" value="0"></div>
+            </div>
+          </section><br>
+
+          <section class="section-block">
+            <h2 class="section-header">Resources Due</h2>
+            <div class="section-content grid-two">
+              <div class="calculator"><label for="coal_%">Coal (%)</label><input type="number" id="coal_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="coal_due" min="0" value="0"></div>
+              <div class="calculator"><label for="iron_%">Iron (%)</label><input type="number" id="iron_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="iron_due" min="0" value="0"></div>
+              <div class="calculator"><label for="gold_%">Gold (%)</label><input type="number" id="gold_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="gold_due" min="0" value="0"></div>
+              <div class="calculator"><label for="copper_%">Copper (%)</label><input type="number" id="copper_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="copper_due" min="0" value="0"></div>
+              <div class="calculator"><label for="diamond_%">Diamonds (%)</label><input type="number" id="diamond_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="diamond_due" min="0" value="0"></div>
+              <div class="calculator"><label for="wheat_%">Wheat (%)</label><input type="number" id="wheat_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="wheat_due" min="0" value="0"></div>
+              <div class="calculator"><label for="bread_%">Bread (%)</label><input type="number" id="bread_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="bread_due" min="0" value="0"></div>
+              <div class="calculator"><label for="log_%">Logs (%)</label><input type="number" id="log_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="log_due" min="0" value="0"></div>
+              <div class="calculator"><label for="wood_%">Planks (%)</label><input type="number" id="wood_%" min="0" max="100" value="0"><br><label>(Amount)</label><input type="number" id="wood_due" min="0" value="0"></div>
+            </div>
+          </section><br>
+
+          <section class="section-block">
+            <h2 class="section-header">Current Resources</h2>
+            <div class="section-content grid-two">
+              <div class="calculator"><label>Coal</label><input type="number" id="coal" value="0"></div>
+              <div class="calculator"><label>Iron Bars</label><input type="number" id="iron_bars" value="0"></div>
+              <div class="calculator"><label>Gold Bars</label><input type="number" id="gold_bars" value="0"></div>
+              <div class="calculator"><label>Copper Bars</label><input type="number" id="copper_bars" value="0"></div>
+              <div class="calculator"><label>Diamonds</label><input type="number" id="diamonds" value="0"></div>
+              <div class="calculator"><label>Wheat</label><input type="number" id="wheat" value="0"></div>
+              <div class="calculator"><label>Bread</label><input type="number" id="bread" value="0"></div>
+              <div class="calculator"><label>Logs</label><input type="number" id="logs" value="0"></div>
+              <div class="calculator"><label>Planks</label><input type="number" id="wood" value="0"></div>
+              <div class="calculator"><label>Iron Ore</label><input type="number" id="iron_ore" value="0"></div>
+              <div class="calculator"><label>Gold Ore</label><input type="number" id="gold_ore" value="0"></div>
+              <div class="calculator"><label>Copper Ore</label><input type="number" id="copper_ore" value="0"></div>
+            </div>
+          </section><br>
+
+          <section class="section-block">
+            <h2 class="section-header">Extra Information</h2>
+            <div class="section-content grid-two">
+              <div class="calculator"><label>Beds (workers)</label><input type="number" id="beds" value="0"></div>
+              <div class="calculator"><label>Workspaces</label><input type="number" id="farms" value="0"></div>
+            </div>
+          </section><br>
+
+        </div>
+
+        <div id="results">
+          <div id="result" class="result-display"></div>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/minecraftMedievalCalculator.js"></script>
+  </body>
+</html>
