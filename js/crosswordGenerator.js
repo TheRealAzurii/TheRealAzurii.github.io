@@ -1,9 +1,8 @@
 const rowsInput = document.getElementById('rows');
 const colsInput = document.getElementById('cols');
 const generateBtn = document.getElementById('generate');
+const autoFillBtn = document.getElementById('auto-fill');
 const gridArea = document.getElementById('grid-area');
-const clearBtn = document.getElementById('clear-grid');
-const exportBtn = document.getElementById('export');
 const wordsList = document.getElementById('words-list');
 
 let grid = [];
@@ -230,6 +229,36 @@ function renderWords(words) {
         inp.value = w.clue || '';
         inp.addEventListener('input', e => { w.clue = e.target.value; highlightWord(w); });
         div.addEventListener('click', () => highlightWord(w));
+        div.addEventListener('dblclick', async (e) => {
+            const inpEl = div.querySelector('input');
+            let wordStr = '';
+            for (let k = 0; k < w.cells.length; k++) {
+                const [r, c] = w.cells[k];
+                const ch = (grid[r][c].char || '').toUpperCase();
+                if (!ch) { wordStr = null; break; }
+                wordStr += ch;
+            }
+            if (!wordStr) {
+                w.clue = "Error: Couldn't fetch";
+                if (inpEl) inpEl.value = w.clue;
+                return;
+            }
+            try {
+                const dres = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordStr.toLowerCase()}`);
+                if (!dres.ok) throw new Error('no-def');
+                const darr = await dres.json();
+                let definition = '';
+                if (Array.isArray(darr) && darr[0] && darr[0].meanings && darr[0].meanings[0] && darr[0].meanings[0].definitions && darr[0].meanings[0].definitions[0]) {
+                    definition = darr[0].meanings[0].definitions[0].definition || '';
+                }
+                if (!definition) throw new Error('no-def');
+                w.clue = definition;
+                if (inpEl) inpEl.value = w.clue;
+            } catch (err) {
+                w.clue = "Error: Couldn't fetch";
+                if (inpEl) inpEl.value = w.clue;
+            }
+        });
         controls.appendChild(inp);
         div.appendChild(meta);
         div.appendChild(pattern);
@@ -263,23 +292,9 @@ function highlightWord(w) {
 }
 
 generateBtn.addEventListener('click', () => {
-    const r = Math.max(3, Math.min(30, parseInt(rowsInput.value, 10) || 10));
-    const c = Math.max(3, Math.min(30, parseInt(colsInput.value, 10) || 10));
+    const r = Math.max(3, Math.min(10, parseInt(rowsInput.value, 10) || 10));
+    const c = Math.max(3, Math.min(15, parseInt(colsInput.value, 10) || 10));
     makeGrid(r, c);
-});
-
-clearBtn.addEventListener('click', clearGrid);
-
-exportBtn.addEventListener('click', () => {
-    const gridText = grid.map(r => r.map(c => (c.block ? '#' : (c.char || '_'))).join('')).join('\n');
-    const words = [];
-    wordsList.querySelectorAll('.word-item').forEach((el, i) => {
-        const clue = el.querySelector('input').value.trim();
-        const meta = el.querySelector('.meta').textContent;
-        words.push(`${meta} — ${clue}`);
-    });
-    const exportText = `GRID:\n${gridText}\n\nCLUES:\n${words.join('\n')}`;
-    navigator.clipboard.writeText(exportText).then(() => { exportBtn.textContent = 'Copied'; setTimeout(() => exportBtn.textContent = 'Copy Export', 1200); }).catch(() => { exportBtn.textContent = 'Error'; setTimeout(() => exportBtn.textContent = 'Copy Export', 1200); });
 });
 
 function toggleWordAt(r, c) {
@@ -293,3 +308,148 @@ function toggleWordAt(r, c) {
     if (focusedWord.dir === 'Across' && down) highlightWord(down);
     else if (focusedWord.dir === 'Down' && across) highlightWord(across);
 }
+
+async function autoFill() {
+    if (!autoFillBtn) return;
+    const origText = autoFillBtn.textContent;
+    autoFillBtn.disabled = true;
+    autoFillBtn.textContent = 'Filling...';
+    try {
+        const prevKey = wordKey(focusedWord);
+        detectWords();
+        if (!prevKey) {
+            autoFillBtn.textContent = 'Failed';
+            await new Promise(r => setTimeout(r, 2000));
+            return;
+        }
+        const s = detectedWords.find(w => wordKey(w) === prevKey);
+        if (!s) {
+            autoFillBtn.textContent = 'Failed';
+            await new Promise(r => setTimeout(r, 2000));
+            return;
+        }
+        const sIndex = detectedWords.indexOf(s);
+
+        const cellMap = new Map();
+        detectedWords.forEach((wd, idx) => {
+            wd.cells.forEach(([rr, cc]) => {
+                const key = `${rr},${cc}`;
+                const arr = cellMap.get(key) || [];
+                arr.push(idx);
+                cellMap.set(key, arr);
+            });
+        });
+
+        const slotAlreadyFull = !s.pattern.includes('_');
+        const fetchPattern = slotAlreadyFull ? '?'.repeat(s.len) : s.pattern.replace(/_/g, '?');
+        const pattern = fetchPattern.toLowerCase();
+        const url = `https://api.datamuse.com/words?sp=${encodeURIComponent(pattern)}&max=1000`;
+        let arr = [];
+        try {
+            const res = await fetch(url);
+            if (res.ok) arr = await res.json();
+        } catch (e) {
+            console.error('Datamuse fetch failed', e);
+        }
+
+        const seen = new Set();
+        const candObjs = (arr || []).map(o => ({ word: (o.word || '').toUpperCase(), score: o.score || 0 }))
+            .filter(o => o.word.length === s.len)
+            .sort((a, b) => (b.score || 0) - (a.score || 0))
+            .filter(o => {
+                if (seen.has(o.word)) return false; seen.add(o.word); return true;
+            });
+
+        const existenceCache = new Map();
+        async function wordExists(wordLower) {
+            if (existenceCache.has(wordLower)) return existenceCache.get(wordLower);
+            try {
+                const r = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(wordLower)}&max=1`);
+                if (!r.ok) { existenceCache.set(wordLower, false); return false; }
+                const a = await r.json();
+                const exists = Array.isArray(a) && a.length > 0;
+                existenceCache.set(wordLower, exists);
+                return exists;
+            } catch (e) {
+                existenceCache.set(wordLower, false);
+                return false;
+            }
+        }
+
+        async function candidateValid(candidate) {
+            for (let k = 0; k < s.cells.length; k++) {
+                const [r, c] = s.cells[k];
+                const key = `${r},${c}`;
+                const slotIdxs = cellMap.get(key) || [];
+                let mustMatch = false;
+                for (const otherIdx of slotIdxs) {
+                    if (otherIdx === sIndex) continue;
+                    const other = detectedWords[otherIdx];
+                    if (other && !other.pattern.includes('_')) { mustMatch = true; break; }
+                }
+                if (mustMatch) {
+                    const gch = (grid[r][c].char || '').toUpperCase();
+                    if (gch && gch !== candidate[k]) return false;
+                }
+            }
+
+            if (slotAlreadyFull) {
+                let cur = '';
+                for (let k = 0; k < s.cells.length; k++) { const [r,c]=s.cells[k]; cur += (grid[r][c].char||'').toUpperCase(); }
+                if (candidate === cur) return false;
+            }
+
+            for (let k = 0; k < s.cells.length; k++) {
+                const [r, c] = s.cells[k];
+                const key = `${r},${c}`;
+                const slotIdxs = cellMap.get(key) || [];
+                for (const otherIdx of slotIdxs) {
+                    if (otherIdx === sIndex) continue;
+                    const other = detectedWords[otherIdx];
+                    let otherWord = '';
+                    let hasBlank = false;
+                    for (let kk = 0; kk < other.cells.length; kk++) {
+                        const [or, oc] = other.cells[kk];
+                        let ch;
+                        if (or === r && oc === c) ch = candidate[k];
+                        else ch = (grid[or][oc].char || '_').toUpperCase();
+                        if (ch === '_' || ch === '') hasBlank = true;
+                        otherWord += ch;
+                    }
+                    if (!hasBlank) {
+                        const lower = otherWord.toLowerCase();
+                        const exists = await wordExists(lower);
+                        if (!exists) return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        let chosen = null;
+        for (const obj of candObjs) {
+            if (!obj.word) continue;
+            const w = obj.word;
+            if (await candidateValid(w)) { chosen = w; break; }
+        }
+
+        if (!chosen) {
+            autoFillBtn.textContent = 'Failed';
+            await new Promise(r => setTimeout(r, 1000));
+            return;
+        }
+
+        for (let k = 0; k < s.cells.length; k++) {
+            const [r, c] = s.cells[k];
+            if (!grid[r][c].block) grid[r][c].char = chosen[k];
+        }
+        s.clue = '';
+        renderGrid();
+        detectWords();
+    } finally {
+        autoFillBtn.disabled = false;
+        autoFillBtn.textContent = origText;
+    }
+}
+
+if (autoFillBtn) autoFillBtn.addEventListener('click', autoFill);
