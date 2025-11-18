@@ -1,4 +1,4 @@
-.topNav {
+.topNav{
   position: fixed;
   top: 0;
   left: 0;
@@ -9,28 +9,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 40px;
+  gap: 60px;
   z-index: 1000;
   padding: 0 20px;
-  backdrop-filter: blur(6px);
 }
 
-.topNav a {
+.topNav a{
   color: var(--text-color);
   font-family: var(--font-main);
+  border: 1px solid transparent;
   font-size: 18px;
-  text-decoration: none;
   padding: 8px 12px;
-  border-radius: 4px;
-  transition: background 0.2s ease, color 0.2s ease;
 }
 
-.topNav a:hover {
+.topNav a:hover{
   border: 1px solid var(--border-color);
-  color: #fff;
 }
 
-.topNav a.active {
+.topNav a.active{
   border: 1px solid var(--border-color);
-  background: var(--hover-bg);
 }

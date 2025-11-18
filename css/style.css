@@ -4,6 +4,7 @@
   --border-color: #fff;
   --hover-bg: #272727;
   --font-main: monospace;
+  --grid-gap: 4px;
 }
 
 * {
@@ -12,7 +13,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   background: var(--bg-color);
   color: var(--text-color);
@@ -20,7 +22,12 @@ html, body {
   line-height: 1.5;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: bold;
   margin: 1em 0 0.5em;
 }
@@ -32,15 +39,10 @@ p {
 a {
   color: var(--accent-color);
   text-decoration: none;
-  transition: color 0.2s ease;
 }
 
-a:hover {
-  color: #fff;
-  text-decoration: underline;
-}
-
-ul, ol {
+ul,
+ol {
   margin: 1em 0;
   padding-left: 1.5em;
 }
@@ -52,7 +54,8 @@ table {
   color: var(--text-color);
 }
 
-th, td {
+th,
+td {
   border: 1px solid var(--border-color);
   padding: 8px 12px;
   text-align: left;
@@ -62,18 +65,27 @@ th {
   background: var(--hover-bg);
 }
 
-input, select, textarea, button {
+input,
+select,
+textarea,
+button {
   background: var(--bg-color);
   color: var(--text-color);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
   padding: 6px 10px;
   font-family: var(--font-main);
   font-size: 16px;
   height: 38px;
 }
 
-input:focus, select:focus, textarea:focus, button:hover {
+button {
+  cursor: pointer;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+button:hover {
   background: var(--hover-bg);
   outline: none;
 }
@@ -98,7 +110,6 @@ input[type=number]::-webkit-outer-spin-button {
 img {
   max-width: 100%;
   display: block;
-  border-radius: 4px;
 }
 
 ::-webkit-scrollbar {
@@ -108,17 +119,15 @@ img {
 
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
-  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-track {
   background: var(--bg-color);
 }
 
-pre, code {
-  background: #111;
+pre,
+code {
   color: #0f0;
   padding: 4px 6px;
-  border-radius: 4px;
   font-family: var(--font-main);
 }
