@@ -2,13 +2,13 @@ const result = document.getElementById('result');
 const get = id => document.getElementById(id);
 
 const ids = [
-  'coal_mines','iron_mines','gold_mines','copper_mines','diamond_mines',
-  'wheat_farms','log_farms','saw_mills','wind_mills',
-  'iron_ore','gold_ore','copper_ore',
-  'beds','farms',
-  'coal','iron_bars','gold_bars','copper_bars','diamonds','wheat','bread','logs','wood',
-  'coal_%','iron_%','gold_%','copper_%','diamond_%','wheat_%','bread_%','log_%','wood_%',
-  'coal_due','iron_due','gold_due','copper_due','diamond_due','wheat_due','bread_due','log_due','wood_due'
+  'coal_mines', 'iron_mines', 'gold_mines', 'copper_mines', 'diamond_mines',
+  'wheat_farms', 'log_farms', 'saw_mills', 'wind_mills',
+  'iron_ore', 'gold_ore', 'copper_ore',
+  'beds', 'farms',
+  'coal', 'iron_bars', 'gold_bars', 'copper_bars', 'diamonds', 'wheat', 'bread', 'logs', 'wood',
+  'coal_%', 'iron_%', 'gold_%', 'copper_%', 'diamond_%', 'wheat_%', 'bread_%', 'log_%', 'wood_%',
+  'coal_due', 'iron_due', 'gold_due', 'copper_due', 'diamond_due', 'wheat_due', 'bread_due', 'log_due', 'wood_due'
 ];
 
 const boxes = ids.reduce((acc, id) => {
