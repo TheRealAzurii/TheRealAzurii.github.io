@@ -4,14 +4,29 @@ const generateBtn = document.getElementById('generate');
 const autoFillBtn = document.getElementById('auto-fill');
 const gridArea = document.getElementById('grid-area');
 const wordsList = document.getElementById('words-list');
+const bottomBar = document.getElementById('bottom-bar');
+const bottomBarInner = document.getElementById('bottom-bar-inner');
 
 let grid = [];
 let rows = parseInt(rowsInput.value, 10);
 let cols = parseInt(colsInput.value, 10);
 let detectedWords = [];
 let focusedWord = null;
+let blockChanged = false;
+let bottomMode = null;
+let bottomItems = [];
+let bottomSelectedIndex = -1;
 
 function wordKey(w) { return w ? `${w.dir}-${w.r}-${w.c}` : null; }
+
+function cellsEqual(a, b) {
+    if (!Array.isArray(a) || !Array.isArray(b)) return false;
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i++) {
+        if (a[i][0] !== b[i][0] || a[i][1] !== b[i][1]) return false;
+    }
+    return true;
+}
 
 function makeGrid(r, c) {
     rows = r; cols = c;
@@ -20,6 +35,12 @@ function makeGrid(r, c) {
         grid[i] = new Array(c).fill({ char: '', block: false });
         for (let j = 0; j < c; j++) grid[i][j] = { char: '', block: false };
     }
+
+    detectedWords = [];
+    focusedWord = null;
+    if (wordsList) wordsList.innerHTML = '';
+    hideBottomBar();
+    blockChanged = false;
     renderGrid();
     detectWords();
 }
@@ -73,6 +94,7 @@ function renderGrid() {
                 if (key === ' ' || key === 'Spacebar') {
                     e.preventDefault();
                     grid[i][j].block = true;
+                    blockChanged = true;
                     grid[i][j].char = '';
                     renderGrid();
                     detectWords();
@@ -117,6 +139,7 @@ function renderGrid() {
 function onCellClick(r, c) {
     if (grid[r][c].block) {
         grid[r][c].block = false;
+        blockChanged = true;
         renderGrid();
         detectWords();
         focusCell(r, c);
@@ -130,6 +153,7 @@ function onCellClick(r, c) {
     }
     focusedWord = null;
     clearWordSelection();
+    hideBottomBar();
 }
 
 function focusCell(r, c) {
@@ -157,12 +181,17 @@ function clearWordSelection() { const gridEl = gridArea.querySelector('.grid'); 
 
 function clearGrid() {
     for (let i = 0; i < rows; i++) for (let j = 0; j < cols; j++) grid[i][j] = { char: '', block: false };
+    detectedWords = [];
+    focusedWord = null;
+    if (wordsList) wordsList.innerHTML = '';
+    blockChanged = false;
+    hideBottomBar();
     renderGrid();
     detectWords();
 }
 
 function detectWords() {
-    const prevClues = new Map(detectedWords.map(w => [wordKey(w), w.clue || '']));
+    const prevMap = new Map(detectedWords.map(w => [wordKey(w), w]));
     const words = [];
     for (let i = 0; i < rows; i++) {
         let start = null;
@@ -179,7 +208,9 @@ function detectWords() {
                         word += grid[i][k].char || '_';
                     }
                     const key = `Across-${i}-${start}`;
-                    words.push({ dir: 'Across', r: i, c: start, len, pattern: word, cells, clue: prevClues.get(key) || '' });
+                    const prev = prevMap.get(key);
+                    const clue = (prev && cellsEqual(prev.cells, cells)) ? (prev.clue || '') : '';
+                    words.push({ dir: 'Across', r: i, c: start, len, pattern: word, cells, clue });
                 }
                 start = null;
             }
@@ -200,13 +231,16 @@ function detectWords() {
                         word += grid[k][j].char || '_';
                     }
                     const key = `Down-${start}-${j}`;
-                    words.push({ dir: 'Down', r: start, c: j, len, pattern: word, cells, clue: prevClues.get(key) || '' });
+                    const prev = prevMap.get(key);
+                    const clue = (prev && cellsEqual(prev.cells, cells)) ? (prev.clue || '') : '';
+                    words.push({ dir: 'Down', r: start, c: j, len, pattern: word, cells, clue });
                 }
                 start = null;
             }
         }
     }
     renderWords(words);
+    blockChanged = false;
 }
 
 function renderWords(words) {
@@ -232,63 +266,138 @@ function renderWords(words) {
         div.addEventListener('dblclick', async (e) => {
             const inpEl = div.querySelector('input');
             let wordStr = '';
+
             for (let k = 0; k < w.cells.length; k++) {
                 const [r, c] = w.cells[k];
                 const ch = (grid[r][c].char || '').toUpperCase();
                 if (!ch) { wordStr = null; break; }
                 wordStr += ch;
             }
+
             if (!wordStr) {
                 w.clue = "Error: Couldn't fetch";
                 if (inpEl) inpEl.value = w.clue;
                 return;
             }
+
             try {
                 const dres = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordStr.toLowerCase()}`);
                 if (!dres.ok) throw new Error('no-def');
                 const darr = await dres.json();
-                let definition = '';
-                if (Array.isArray(darr) && darr[0] && darr[0].meanings && darr[0].meanings[0] && darr[0].meanings[0].definitions && darr[0].meanings[0].definitions[0]) {
-                    definition = darr[0].meanings[0].definitions[0].definition || '';
+                const defs = [];
+                if (Array.isArray(darr)) {
+                    for (const entry of darr) {
+                        if (entry.meanings && Array.isArray(entry.meanings)) {
+                            for (const m of entry.meanings) {
+                                if (m.definitions && Array.isArray(m.definitions)) {
+                                    for (const d of m.definitions) {
+                                        if (d && d.definition) defs.push(d.definition);
+                                        if (defs.length >= 10) break;
+                                    }
+                                }
+                                if (defs.length >= 10) break;
+                            }
+                        }
+                        if (defs.length >= 10) break;
+                    }
                 }
-                if (!definition) throw new Error('no-def');
-                w.clue = definition;
+
+                if (defs.length === 0) throw new Error('no-def');
+                w.clue = defs[0] || "";
+
                 if (inpEl) inpEl.value = w.clue;
+                showBottomBar('definitions', defs, 0, (idx) => {
+                    w.clue = defs[idx] || '';
+                    if (inpEl) inpEl.value = w.clue;
+                });
             } catch (err) {
                 w.clue = "Error: Couldn't fetch";
                 if (inpEl) inpEl.value = w.clue;
             }
         });
+
         controls.appendChild(inp);
         div.appendChild(meta);
         div.appendChild(pattern);
         div.appendChild(controls);
         wordsList.appendChild(div);
     });
+
     if (prevKey) {
         const found = detectedWords.find(w => wordKey(w) === prevKey);
-        if (found) highlightWord(found); else focusedWord = null;
+        if (found) highlightWord(found, true); else focusedWord = null;
     }
 }
 
-function highlightWord(w) {
+function highlightWord(w, keepBottom) {
     focusedWord = w;
     clearWordSelection();
+
+    if (!keepBottom) hideBottomBar();
     const gridEl = gridArea.querySelector('.grid');
     w.cells.forEach(([r, c]) => {
         const cell = gridEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
         if (cell) cell.classList.add('highlight');
     });
+
     const idx = detectedWords.indexOf(w);
     if (idx !== -1) {
         const el = wordsList.children[idx];
         if (el) { el.classList.add('selected'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     }
+
     const first = w.cells[0];
     if (first) {
         const cellEl = gridEl.querySelector(`.cell[data-r="${first[0]}"][data-c="${first[1]}"]`);
         if (cellEl) cellEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
     }
+}
+
+function showBottomBar(mode, items, selectedIndex = 0, onSelect) {
+    if (!bottomBar || !bottomBarInner) return;
+    bottomMode = mode;
+    bottomItems = items || [];
+    bottomSelectedIndex = selectedIndex >= 0 ? selectedIndex : 0;
+    bottomBarInner.innerHTML = '';
+    bottomItems.forEach((it, idx) => {
+        const div = document.createElement('div');
+        div.className = 'bottom-item';
+        const displayText = (it && typeof it === 'object') ? (it.display || it.raw || it.word || String(it)) : String(it);
+        div.textContent = displayText;
+        if (idx === bottomSelectedIndex) div.classList.add('selected');
+        div.addEventListener('click', () => {
+            // update selection UI
+            Array.from(bottomBarInner.children).forEach(ch => ch.classList.remove('selected'));
+            div.classList.add('selected');
+            bottomSelectedIndex = idx;
+            if (typeof onSelect === 'function') onSelect(idx);
+        });
+        bottomBarInner.appendChild(div);
+    });
+    bottomBar.classList.remove('hidden');
+    bottomBar.setAttribute('aria-hidden', 'false');
+}
+
+function hideBottomBar() {
+    if (!bottomBar || !bottomBarInner) return;
+    bottomMode = null;
+    bottomItems = [];
+    bottomSelectedIndex = -1;
+    bottomBarInner.innerHTML = '';
+    bottomBar.classList.add('hidden');
+    bottomBar.setAttribute('aria-hidden', 'true');
+}
+
+function applyCandidateToSlot(s, word) {
+    if (!s || !word) return;
+
+    for (let k = 0; k < s.cells.length; k++) {
+        const [r, c] = s.cells[k];
+        if (!grid[r][c].block) grid[r][c].char = word[k];
+    }
+    s.clue = '';
+    renderGrid();
+    detectWords();
 }
 
 generateBtn.addEventListener('click', () => {
@@ -300,11 +409,14 @@ generateBtn.addEventListener('click', () => {
 function toggleWordAt(r, c) {
     const found = detectedWords.filter(w => indexInWord(w, r, c) !== -1);
     if (found.length === 0) return;
+
     const across = found.find(w => w.dir === 'Across');
     const down = found.find(w => w.dir === 'Down');
     if (!focusedWord) { highlightWord(across || down); return; }
+
     const contains = indexInWord(focusedWord, r, c) !== -1;
     if (!contains) { highlightWord(across || down); return; }
+
     if (focusedWord.dir === 'Across' && down) highlightWord(down);
     else if (focusedWord.dir === 'Down' && across) highlightWord(across);
 }
@@ -322,12 +434,14 @@ async function autoFill() {
             await new Promise(r => setTimeout(r, 2000));
             return;
         }
+
         const s = detectedWords.find(w => wordKey(w) === prevKey);
         if (!s) {
             autoFillBtn.textContent = 'Failed';
             await new Promise(r => setTimeout(r, 2000));
             return;
         }
+
         const sIndex = detectedWords.indexOf(s);
 
         const cellMap = new Map();
@@ -352,14 +466,21 @@ async function autoFill() {
             console.error('Datamuse fetch failed', e);
         }
 
+        const mapped = (arr || []).map(o => {
+            const raw = (o.word || '');
+            const lettersOnly = raw.replace(/\s+/g, '').replace(/[^A-Z0-9]/gi, '').toUpperCase();
+            return { raw, lettersOnly, score: o.score || 0 };
+        })
+            .filter(it => it.lettersOnly.length === s.len)
+            .sort((a, b) => (b.score || 0) - (a.score || 0));
+        const candObjs = [];
         const seen = new Set();
-        const candObjs = (arr || []).map(o => ({ word: (o.word || '').toUpperCase(), score: o.score || 0 }))
-            .filter(o => o.word.length === s.len)
-            .sort((a, b) => (b.score || 0) - (a.score || 0))
-            .filter(o => {
-                if (seen.has(o.word)) return false; seen.add(o.word); return true;
-            });
-
+        for (const it of mapped) {
+            if (!it.lettersOnly) continue;
+            if (seen.has(it.lettersOnly)) continue;
+            seen.add(it.lettersOnly);
+            candObjs.push(it);
+        }
         const existenceCache = new Map();
         async function wordExists(wordLower) {
             if (existenceCache.has(wordLower)) return existenceCache.get(wordLower);
@@ -381,16 +502,14 @@ async function autoFill() {
                 const [r, c] = s.cells[k];
                 const key = `${r},${c}`;
                 const slotIdxs = cellMap.get(key) || [];
-                let mustMatch = false;
+                let locked = false;
                 for (const otherIdx of slotIdxs) {
                     if (otherIdx === sIndex) continue;
                     const other = detectedWords[otherIdx];
-                    if (other && !other.pattern.includes('_')) { mustMatch = true; break; }
+                    if (other && !other.pattern.includes('_')) { locked = true; break; }
                 }
-                if (mustMatch) {
-                    const gch = (grid[r][c].char || '').toUpperCase();
-                    if (gch && gch !== candidate[k]) return false;
-                }
+                const gch = (grid[r][c].char || '').toUpperCase();
+                if (locked && gch && gch !== candidate[k]) return false;
             }
 
             if (slotAlreadyFull) {
@@ -406,6 +525,7 @@ async function autoFill() {
                 for (const otherIdx of slotIdxs) {
                     if (otherIdx === sIndex) continue;
                     const other = detectedWords[otherIdx];
+                    if (!other) continue;
                     let otherWord = '';
                     let hasBlank = false;
                     for (let kk = 0; kk < other.cells.length; kk++) {
@@ -413,8 +533,8 @@ async function autoFill() {
                         let ch;
                         if (or === r && oc === c) ch = candidate[k];
                         else ch = (grid[or][oc].char || '_').toUpperCase();
-                        if (ch === '_' || ch === '') hasBlank = true;
-                        otherWord += ch;
+                        if (!ch || ch === '_') hasBlank = true;
+                        otherWord += ch || '_';
                     }
                     if (!hasBlank) {
                         const lower = otherWord.toLowerCase();
@@ -426,26 +546,25 @@ async function autoFill() {
             return true;
         }
 
-        let chosen = null;
+        const validCandidates = [];
         for (const obj of candObjs) {
-            if (!obj.word) continue;
-            const w = obj.word;
-            if (await candidateValid(w)) { chosen = w; break; }
+            if (!obj || !obj.lettersOnly) continue;
+            if (validCandidates.length >= 100) break;
+            if (await candidateValid(obj.lettersOnly)) validCandidates.push({ display: obj.raw, word: obj.lettersOnly });
         }
 
-        if (!chosen) {
+        if (validCandidates.length === 0) {
             autoFillBtn.textContent = 'Failed';
             await new Promise(r => setTimeout(r, 1000));
             return;
         }
 
-        for (let k = 0; k < s.cells.length; k++) {
-            const [r, c] = s.cells[k];
-            if (!grid[r][c].block) grid[r][c].char = chosen[k];
-        }
-        s.clue = '';
-        renderGrid();
-        detectWords();
+        const chosen = validCandidates[0];
+        applyCandidateToSlot(s, chosen.word);
+        showBottomBar('candidates', validCandidates, 0, (idx) => {
+            const item = bottomItems[idx];
+            if (item && item.word) applyCandidateToSlot(s, item.word);
+        });
     } finally {
         autoFillBtn.disabled = false;
         autoFillBtn.textContent = origText;
