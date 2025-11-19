@@ -27,7 +27,7 @@ function makeGrid(r, c) {
 function renderGrid() {
     gridArea.innerHTML = '';
     const wrapper = document.createElement('div');
-    wrapper.className = 'grid';
+    wrapper.className = 'grid';a
     wrapper.style.gridTemplateColumns = `repeat(${cols}, 32px)`;
     wrapper.style.gridTemplateRows = `repeat(${rows}, 32px)`;
     for (let i = 0; i < rows; i++) {
@@ -36,11 +36,14 @@ function renderGrid() {
             cell.className = 'cell';
             cell.dataset.r = i; cell.dataset.c = j;
             const data = grid[i][j];
+
             if (data.block) cell.classList.add('block');
+
             const inp = document.createElement('input');
             inp.maxLength = 1;
             inp.value = data.block ? '' : (data.char || '');
             inp.disabled = data.block;
+
             if (data.block) {
                 inp.style.pointerEvents = 'none';
                 cell.style.cursor = 'pointer';
@@ -53,6 +56,7 @@ function renderGrid() {
                 e.target.value = v;
                 grid[i][j].char = v === ' ' ? '' : v;
                 detectWords();
+
                 if (focusedWord) {
                     const idx = indexInWord(focusedWord, i, j);
                     if (idx !== -1 && v !== '') {
@@ -61,6 +65,7 @@ function renderGrid() {
                     }
                 }
             });
+
             inp.addEventListener('keydown', e => {
                 const key = e.key;
                 if (key === 'ArrowRight' || key === 'ArrowLeft' || key === 'ArrowUp' || key === 'ArrowDown') {
@@ -70,6 +75,7 @@ function renderGrid() {
                     focusCell(nr, nc);
                     return;
                 }
+
                 if (key === ' ' || key === 'Spacebar') {
                     e.preventDefault();
                     grid[i][j].block = true;
@@ -80,6 +86,7 @@ function renderGrid() {
                     focusCell(nr, nc);
                     return;
                 }
+
                 if (key === 'Backspace') {
                     const val = inp.value;
                     const inFocused = focusedWord && indexInWord(focusedWord, i, j) !== -1;
@@ -105,6 +112,7 @@ function renderGrid() {
                     onCellClick(i, j);
                 }
             });
+
             cell.addEventListener('dblclick', () => toggleWordAt(i, j));
             cell.addEventListener('click', () => onCellClick(i, j));
             cell.appendChild(inp);
@@ -122,12 +130,14 @@ function onCellClick(r, c) {
         focusCell(r, c);
         return;
     }
+
     focusCell(r, c);
     const gridEl = gridArea.querySelector('.grid');
     const cellEl = gridEl && gridEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
     if (cellEl && cellEl.classList.contains('highlight')) {
         return;
     }
+
     focusedWord = null;
     clearWordSelection();
 }
@@ -185,6 +195,7 @@ function detectWords() {
             }
         }
     }
+
     for (let j = 0; j < cols; j++) {
         let start = null;
         for (let i = 0; i <= rows; i++) {
@@ -232,17 +243,20 @@ function renderWords(words) {
         div.addEventListener('dblclick', async (e) => {
             const inpEl = div.querySelector('input');
             let wordStr = '';
+
             for (let k = 0; k < w.cells.length; k++) {
                 const [r, c] = w.cells[k];
                 const ch = (grid[r][c].char || '').toUpperCase();
                 if (!ch) { wordStr = null; break; }
                 wordStr += ch;
             }
+
             if (!wordStr) {
                 w.clue = "Error: Couldn't fetch";
                 if (inpEl) inpEl.value = w.clue;
                 return;
             }
+
             try {
                 const dres = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${wordStr.toLowerCase()}`);
                 if (!dres.ok) throw new Error('no-def');
@@ -265,6 +279,7 @@ function renderWords(words) {
         div.appendChild(controls);
         wordsList.appendChild(div);
     });
+
     if (prevKey) {
         const found = detectedWords.find(w => wordKey(w) === prevKey);
         if (found) highlightWord(found); else focusedWord = null;
@@ -279,11 +294,13 @@ function highlightWord(w) {
         const cell = gridEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
         if (cell) cell.classList.add('highlight');
     });
+
     const idx = detectedWords.indexOf(w);
     if (idx !== -1) {
         const el = wordsList.children[idx];
         if (el) { el.classList.add('selected'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
     }
+
     const first = w.cells[0];
     if (first) {
         const cellEl = gridEl.querySelector(`.cell[data-r="${first[0]}"][data-c="${first[1]}"]`);
@@ -299,12 +316,18 @@ generateBtn.addEventListener('click', () => {
 
 function toggleWordAt(r, c) {
     const found = detectedWords.filter(w => indexInWord(w, r, c) !== -1);
+
     if (found.length === 0) return;
+
     const across = found.find(w => w.dir === 'Across');
     const down = found.find(w => w.dir === 'Down');
+
     if (!focusedWord) { highlightWord(across || down); return; }
+
     const contains = indexInWord(focusedWord, r, c) !== -1;
+
     if (!contains) { highlightWord(across || down); return; }
+
     if (focusedWord.dir === 'Across' && down) highlightWord(down);
     else if (focusedWord.dir === 'Down' && across) highlightWord(across);
 }
@@ -322,12 +345,14 @@ async function autoFill() {
             await new Promise(r => setTimeout(r, 2000));
             return;
         }
+
         const s = detectedWords.find(w => wordKey(w) === prevKey);
         if (!s) {
             autoFillBtn.textContent = 'Failed';
             await new Promise(r => setTimeout(r, 2000));
             return;
         }
+
         const sIndex = detectedWords.indexOf(s);
 
         const cellMap = new Map();
@@ -403,11 +428,13 @@ async function autoFill() {
                 const [r, c] = s.cells[k];
                 const key = `${r},${c}`;
                 const slotIdxs = cellMap.get(key) || [];
+                
                 for (const otherIdx of slotIdxs) {
                     if (otherIdx === sIndex) continue;
                     const other = detectedWords[otherIdx];
                     let otherWord = '';
                     let hasBlank = false;
+
                     for (let kk = 0; kk < other.cells.length; kk++) {
                         const [or, oc] = other.cells[kk];
                         let ch;
@@ -416,6 +443,7 @@ async function autoFill() {
                         if (ch === '_' || ch === '') hasBlank = true;
                         otherWord += ch;
                     }
+
                     if (!hasBlank) {
                         const lower = otherWord.toLowerCase();
                         const exists = await wordExists(lower);
