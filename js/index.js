@@ -1,21 +1,199 @@
-const pages = [
-    { id: 'note', name: 'Notepad', file: 'pages/notepad.html' },
-    { id: 'freq', name: 'Frequency', file: 'pages/frequencyEncoder.html' },
-    { id: 'cross', name: 'Crossword', file: 'pages/crosswordGenerator.html' },
-    { id: 'med', name: 'Calculator', file: 'pages/minecraftMedievalCalculator.html' },
+const publicPages = [
+    {id: 'note', name: 'Notepad', file: 'pages/notepad.html', code: 'notepad'},
+    {id: 'enq', name: 'Encoder', file: 'pages/frequencyEncoder.html', code: 'encoder'},
+    {id: 'cross', name: 'Crossword', file: 'pages/crosswordGenerator.html', code: 'crossword'},
+    {id: 'med', name: 'Calculator', file: 'pages/minecraftMedievalCalculator.html', code: 'calculator'},
 ];
+
+const secretPages = [
+     {id: 'dec', name: 'Decoder', file: 'pages/frequencyDecoder.html', unlocked: false, code: 'decoder'}
+];
+
+let pages = []; 
+let unlockedAppIds = [];
 
 let zIndex = 100;
 const desktop = document.getElementById('desktop');
 const taskList = document.getElementById('task-list');
 
+const launcherInput = document.getElementById('launcher-input');
+const suggestionsBox = document.getElementById('launcher-suggestions');
+let suggestionIndex = -1;
+
+
 function initOS() {
+    loadUnlockedApps();
+    
+    pages = [...publicPages];
+    secretPages.forEach(app => {
+        if (unlockedAppIds.includes(app.id)) {
+            app.unlocked = true;
+            pages.push(app);
+        }
+    });
+
     pages.forEach(app => {
         createTaskbarItem(app);
     });
+    
+    initLauncher();
     startClock();
     loadWindows();
     createAnalogClock();
+}
+
+function loadUnlockedApps() {
+    try {
+        unlockedAppIds = JSON.parse(localStorage.getItem('unlocked-apps') || '[]');
+    } catch (e) {
+        console.error("Error loading unlocked apps:", e);
+        unlockedAppIds = [];
+    }
+}
+
+function initLauncher() {
+    launcherInput.addEventListener('input', () => {
+        const value = launcherInput.value.toLowerCase();
+        suggestionsBox.innerHTML = '';
+        suggestionIndex = -1;
+
+        if (!value) {
+            suggestionsBox.style.display = 'none';
+            return;
+        }
+
+        const matchingApps = pages.filter(app => 
+            (app.code && app.code.startsWith(value))
+        );
+
+        matchingApps.forEach((app, index) => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.textContent = app.code;
+            item.dataset.code = app.code;
+            item.dataset.index = index;
+            
+            item.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                handleLaunch(item.dataset.code);
+            });
+            
+            suggestionsBox.appendChild(item);
+        });
+
+        suggestionsBox.style.display = matchingApps.length > 0 ? 'block' : 'none';
+    });
+
+    launcherInput.addEventListener('keydown', (e) => {
+        const items = suggestionsBox.querySelectorAll('.suggestion-item');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (suggestionIndex < items.length - 1) {
+                suggestionIndex++;
+                updateSuggestionHighlight(items);
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (suggestionIndex > 0) {
+                suggestionIndex--;
+                updateSuggestionHighlight(items);
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            let codeToLaunch;
+            if (suggestionIndex !== -1 && items[suggestionIndex]) {
+                codeToLaunch = items[suggestionIndex].dataset.code;
+            } else {
+                codeToLaunch = launcherInput.value;
+            }
+            handleLaunch(codeToLaunch);
+        } else if (e.key === 'Escape') {
+            clearLauncher();
+        }
+    });
+    
+    launcherInput.addEventListener('blur', () => {
+        setTimeout(() => {
+            if (document.activeElement !== launcherInput) {
+                 suggestionsBox.style.display = 'none';
+                 suggestionIndex = -1;
+            }
+    }, 150);
+    });
+}
+
+function updateSuggestionHighlight(items) {
+    items.forEach((item, index) => {
+        if (index === suggestionIndex) {
+            item.classList.add('selected');
+        } else {
+            item.classList.remove('selected');
+        }
+    });
+}
+
+function clearLauncher() {
+    launcherInput.value = '';
+    suggestionsBox.innerHTML = '';
+    suggestionsBox.style.display = 'none';
+    suggestionIndex = -1;
+}
+
+
+function handleLaunch(code) {
+    const term = code.toLowerCase().trim();
+    if (!term) return;
+
+    let appToLaunch = pages.find(app => 
+        (app.code && app.code === term)
+    );
+
+    if (appToLaunch) {
+        launchApp(appToLaunch);
+        clearLauncher();
+        return;
+    }
+
+    let secretApp = secretPages.find(app => !app.unlocked && app.code === term);
+    
+    if (secretApp) {
+        unlockApp(secretApp);
+        clearLauncher();
+        return;
+    }
+    
+    console.log(`Code not recognized: ${term}`);
+    clearLauncher();
+}
+
+
+function launchApp(app) {
+    const winId = `win-${app.id}`;
+    const existingWin = document.getElementById(winId);
+    
+    if (!existingWin) {
+        createWindow(app);
+    } else {
+        toggleWindow(winId, app.id);
+    }
+}
+
+
+function unlockApp(app) {
+    console.log(`Unlocking app: ${app.name}`);
+    
+    app.unlocked = true;
+    pages.push(app);
+    
+    if (!unlockedAppIds.includes(app.id)) {
+        unlockedAppIds.push(app.id);
+        localStorage.setItem('unlocked-apps', JSON.stringify(unlockedAppIds));
+    }
+    
+    createTaskbarItem(app);
+    
+    launchApp(app);
 }
 
 
@@ -54,17 +232,22 @@ function createAnalogClock() {
 
 
 function loadWindows() {
+    const allPossibleApps = [...publicPages, ...secretPages];
+    
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key.startsWith('win-')) {
             try {
                 const appId = key.substring(4);
-                const app = pages.find(a => a.id === appId);
-                if (app) {
+                const app = allPossibleApps.find(a => a.id === appId);
+                
+                if (app && pages.find(p => p.id === appId)) {
                     const savedState = JSON.parse(localStorage.getItem(key));
                     if (savedState) {
                         createWindow(app, savedState);
                     }
+                } else if (app) {
+                    localStorage.removeItem(key);
                 }
             } catch (e) {
                 console.error("Error loading window state:", e);
@@ -82,12 +265,7 @@ function createTaskbarItem(app) {
     btn.id = `task-${app.id}`;
     
     btn.onclick = () => {
-        const existingWin = document.getElementById(`win-${app.id}`);
-        if (!existingWin) {
-            createWindow(app);
-        } else {
-            toggleWindow(`win-${app.id}`, app.id);
-        }
+        launchApp(app);
     };
     
     taskList.appendChild(btn);
@@ -216,7 +394,7 @@ function applyZoom(winId, zoomStep) {
                  iframe.contentDocument.body.style.width = `${100/currentZoom}%`;
             }
         }
-    } catch (e) { 
+    } catch (e) {
         console.warn("Could not apply zoom to iframe:", e.message);
     }
 }
@@ -258,7 +436,6 @@ function closeWindow(winId, appId) {
     }
     updateTaskbarState(appId, 'closed');
     localStorage.removeItem(winId);
-    localStorage.removeItem(`${appId}-content`); 
 }
 
 
@@ -292,6 +469,8 @@ function bringToFront(win) {
 
 function updateTaskbarState(appId, state) {
     const btn = document.getElementById(`task-${appId}`);
+    if (!btn) return;
+    
     btn.classList.remove('open', 'minimized');
     
     if (state === 'open') {
@@ -387,7 +566,7 @@ function startClock() {
     function update() {
         const now = new Date();
         document.getElementById('clock').textContent = 
-            now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            now.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit' });
     }
     setInterval(update, 1000);
     update();
