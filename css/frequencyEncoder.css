@@ -1,0 +1,100 @@
+.content {
+  text-align: center;
+  font-size: 18px;
+}
+
+.encoder-ui {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.message-input {
+  display: grid;
+  grid-template-columns: 1fr 120px 80px;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+}
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+}
+
+.message-item {
+  display: grid;
+  grid-template-columns: 1fr 100px 90px;
+  align-items: center;
+  padding: 6px 8px;
+  gap: 10px;
+}
+
+.message-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.message-item input {
+  width: 100%;
+  text-align: center;
+  height: 30px;
+}
+
+.message-item button {
+  padding: 4px 6px;
+  cursor: pointer;
+  height: 30px;
+}
+
+#encoding-sheet {
+  width: 100%;
+  max-width: 800px;
+  min-height: 200px;
+  color: var(--border-color);
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--grid-gap);
+}
+
+.cell {
+  width: 20px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  pointer-events: none;
+}
+
+.cell.prefilled {
+  border: 1px solid var(--border-color);
+  font-weight: bold;
+}
+
+.cell.empty {
+  opacity: 0.3;
+}
+
+.cell.editable {
+  cursor: pointer;
+}
+
+.cell.spacer {
+  opacity: 0.3;
+}
+
+.cell.cursor {
+  outline: 2px solid var(--border-color);
+}

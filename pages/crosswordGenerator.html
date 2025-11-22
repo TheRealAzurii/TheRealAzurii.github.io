@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <link rel="stylesheet" href="../css/crosswordGenerator.css"/>
+</head>
+
+<body>
+  <main class="content">
+    <div class="generator-ui">
+      <div class="controls">
+        <input id="rows" type="number" min="3" max="10" value="10">
+        <input id="cols" type="number" min="3" max="15" value="10">
+        <button id="generate">Generate</button>
+        <button id="auto-fill">Fill</button>
+      </div>
+
+      <div class="main-area">
+        <div id="grid-area" class="grid-area" tabindex="0" aria-label="Crossword grid"></div>
+
+        <div class="clues-area">
+          <div id="words-list" class="words-list"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="bottom-bar" class="bottom-bar hidden" aria-hidden="true">
+    <div id="bottom-bar-inner" class="bottom-bar-inner"></div>
+  </div>
+</body> <script src="../js/crosswordGenerator.js"></script>
+
+</html>
