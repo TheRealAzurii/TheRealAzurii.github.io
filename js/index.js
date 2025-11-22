@@ -1,4 +1,5 @@
-const installedApps = [
+const pages = [
+    { id: 'note', name: 'Notepad', file: 'pages/notepad.html' },
     { id: 'freq', name: 'Frequency', file: 'pages/frequencyEncoder.html' },
     { id: 'cross', name: 'Crossword', file: 'pages/crosswordGenerator.html' },
     { id: 'med', name: 'Calculator', file: 'pages/minecraftMedievalCalculator.html' },
@@ -9,10 +10,68 @@ const desktop = document.getElementById('desktop');
 const taskList = document.getElementById('task-list');
 
 function initOS() {
-    installedApps.forEach(app => {
+    pages.forEach(app => {
         createTaskbarItem(app);
     });
     startClock();
+    loadWindows();
+    createAnalogClock();
+}
+
+
+function createAnalogClock() {
+    const clockContainer = document.createElement('div');
+    clockContainer.className = 'analog-clock';
+    
+    clockContainer.innerHTML = `
+        <div class="hand hour-hand" data-hand="hour"></div>
+        <div class="hand minute-hand" data-hand="minute"></div>
+        <div class="hand second-hand" data-hand="second"></div>
+        <div class="clock-center"></div>
+    `;
+    
+    desktop.appendChild(clockContainer);
+    
+    const hourHand = clockContainer.querySelector('[data-hand="hour"]');
+    const minuteHand = clockContainer.querySelector('[data-hand="minute"]');
+    const secondHand = clockContainer.querySelector('[data-hand="second"]');
+
+    function updateAnalogClock() {
+        const now = new Date();
+        
+        const secondsRatio = now.getSeconds() / 60;
+        const minutesRatio = (secondsRatio + now.getMinutes()) / 60;
+        const hoursRatio = (minutesRatio + now.getHours()) / 12;
+        
+        secondHand.style.transform = `translateX(-50%) rotate(${secondsRatio * 360}deg)`;
+        minuteHand.style.transform = `translateX(-50%) rotate(${minutesRatio * 360}deg)`;
+        hourHand.style.transform = `translateX(-50%) rotate(${hoursRatio * 360}deg)`;
+    }
+    
+    updateAnalogClock();
+    setInterval(updateAnalogClock, 1000);
+}
+
+
+function loadWindows() {
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith('win-')) {
+            try {
+                const appId = key.substring(4);
+                const app = pages.find(a => a.id === appId);
+                if (app) {
+                    const savedState = JSON.parse(localStorage.getItem(key));
+                    if (savedState) {
+                        createWindow(app, savedState);
+                    }
+                }
+            } catch (e) {
+                console.error("Error loading window state:", e);
+                localStorage.removeItem(key);
+            }
+        }
+    }
 }
 
 
@@ -35,13 +94,17 @@ function createTaskbarItem(app) {
 }
 
 
-function createWindow(app) {
+function createWindow(app, savedState = null) {
     const win = document.createElement('div');
     win.className = 'window';
     win.id = `win-${app.id}`;
-    win.style.top = '50px';
-    win.style.left = '50px';
-    win.dataset.zoom = "1.0"; 
+
+    const state = savedState || {};
+    win.style.top = state.top || '50px';
+    win.style.left = state.left || '50px';
+    win.style.width = state.width || '800px';
+    win.style.height = state.height || '600px';
+    win.dataset.zoom = state.zoom || "1.0";
     
     bringToFront(win); 
 
@@ -86,6 +149,10 @@ function createWindow(app) {
     iframe.src = app.file;
     iframe.id = `iframe-${app.id}`;
 
+    iframe.onload = () => {
+        applyZoom(win.id, 0); 
+    };
+
     body.appendChild(iframe);
 
     const resizer = document.createElement('div');
@@ -102,15 +169,38 @@ function createWindow(app) {
     makeResizable(win, resizer);
     
     win.addEventListener('mousedown', () => bringToFront(win));
+
+    if (savedState === null) {
+        saveWindowState(win.id);
+    }
 }
 
 
-function changeZoom(winId, step) {
+function saveWindowState(winId) {
     const win = document.getElementById(winId);
+    if (!win || win.getAttribute('data-maximized')) {
+        return; 
+    }
+    
+    const state = {
+        top: win.style.top,
+        left: win.style.left,
+        width: win.style.width,
+        height: win.style.height,
+        zoom: win.dataset.zoom || "1.0"
+    };
+    
+    localStorage.setItem(winId, JSON.stringify(state));
+}
+
+
+function applyZoom(winId, zoomStep) {
+    const win = document.getElementById(winId);
+    if (!win) return;
     const iframe = win.querySelector('iframe');
     
     let currentZoom = parseFloat(win.dataset.zoom);
-    currentZoom = parseFloat((currentZoom + step).toFixed(1));
+    currentZoom = parseFloat((currentZoom + zoomStep).toFixed(1));
 
     if (currentZoom < 0.5) currentZoom = 0.5;
     if (currentZoom > 3.0) currentZoom = 3.0;
@@ -126,7 +216,15 @@ function changeZoom(winId, step) {
                  iframe.contentDocument.body.style.width = `${100/currentZoom}%`;
             }
         }
-    } catch (e) { }
+    } catch (e) { 
+        console.warn("Could not apply zoom to iframe:", e.message);
+    }
+}
+
+
+function changeZoom(winId, step) {
+    applyZoom(winId, step);
+    saveWindowState(winId);
 }
 
 
@@ -159,6 +257,8 @@ function closeWindow(winId, appId) {
         win.remove();
     }
     updateTaskbarState(appId, 'closed');
+    localStorage.removeItem(winId);
+    localStorage.removeItem(`${appId}-content`); 
 }
 
 
@@ -238,6 +338,8 @@ function makeDraggable(win, handle) {
         function onMouseUp() {
             win.classList.remove('interacting');
             win.classList.remove('dragging');
+
+            saveWindowState(win.id);
             
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
@@ -268,6 +370,8 @@ function makeResizable(win, handle) {
         function onMouseUp() {
             isResizing = false;
             win.classList.remove('interacting');
+
+            saveWindowState(win.id);
             
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
