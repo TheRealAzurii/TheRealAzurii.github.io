@@ -11,7 +11,7 @@ let tempInput = "";
 
 const MAX_LINES = 100;
 
-const headerHTML = `<p>Mock OS [Version 1.0.0]</p><p>(c) 2025 Mock OS Corporation. All rights reserved.</p><br>`;
+const headerHTML = `<p>_ OS [Version 0._._]</p><p>(c) _ _ OS Corporation. All rights reserved.</p><br>`;
 
 function resetTerminal() {
     while (output.firstChild && output.firstChild !== inputLine) {
@@ -113,6 +113,7 @@ function moveCursorToEnd() {
         input.selectionStart = input.selectionEnd = input.value.length;
     }, 0);
 }
+
 
 
 input.focus();
