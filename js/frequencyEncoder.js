@@ -1,14 +1,33 @@
 const input = document.getElementById('hidden-input');
 const newMsg = document.getElementById('new-message');
-const newFreq = document.getElementById('new-frequency');
 const addBtn = document.getElementById('add-message');
 const msgList = document.getElementById('messages-list');
 const sheet = document.getElementById('encoding-sheet');
 const copyBtn = document.getElementById('copy-text');
 
+const frequencyDial = document.getElementById('frequency-dial');
+const dialWheel = document.getElementById('dial-wheel');
+
 let messages = [];
 let sheetData = [];
 let cursorIndex = 0;
+
+const numberWidth = 38;
+let dialWidth = 0;
+let dialCenterOffset = 0;
+const maxFrequency = 100;
+
+let currentFrequency = 1;
+let currentDialValue = 1;
+let validFrequencies = [];
+let isDragging = false;
+let startX = 0;
+let startTranslateX = 0;
+let lastMouseX = 0;
+let lastMouseTime = 0;
+let currentVelocityX = 0;
+let animationFrameId = null;
+
 
 function ensureLength(len) {
   while (sheetData.length < len) sheetData.push({ char: '_', prefilled: false, spacer: false });
@@ -94,20 +113,183 @@ function moveCursor(step) {
 }
 
 
-function getFreq(text) {
-  for (let f = 1; f < 100; f++) {
-    const testMsgs = [...messages, { text, frequency: f }];
-    const res = tryEncodeAll(testMsgs, false);
-    if (res.ok) return f;
+function populateDial(max) {
+  dialWheel.innerHTML = '';
+  for (let i = 1; i <= max; i++) {
+    const div = document.createElement('div');
+    div.className = 'dial-number';
+    div.textContent = i;
+    div.dataset.value = i;
+    dialWheel.appendChild(div);
   }
-  return null;
+}
+
+
+function setDialPosition(value, snap = false, transition = false) {
+  value = Math.max(1, Math.min(maxFrequency, value));
+
+  if (!transition) {
+    dialWheel.style.transition = 'none';
+  } else if (dialWheel.style.transition === 'none') {
+    dialWheel.style.transition = 'transform 0.2s ease-out';
+  }
+
+  let targetValue = value;
+  currentDialValue = value;
+
+  if (snap) {
+    const closestValid = findClosestValid(currentDialValue);
+    currentFrequency = closestValid;
+    targetValue = closestValid;
+    currentDialValue = closestValid;
+  }
+
+  let targetTranslate = dialCenterOffset - (targetValue - 1) * numberWidth;
+  dialWheel.style.transform = `translateX(${targetTranslate}px)`;
+
+  document.querySelectorAll('.dial-number.selected').forEach(el => el.classList.remove('selected'));
+  if (validFrequencies.includes(currentFrequency)) {
+    const selectedEl = dialWheel.querySelector(`.dial-number[data-value="${currentFrequency}"]`);
+    if (selectedEl) {
+      selectedEl.classList.add('selected');
+    }
+  }
+}
+
+
+function findClosestValid(value) {
+  if (validFrequencies.length === 0) {
+    return (messages.length === 0) ? 1 : 0;
+  }
+  const closest = validFrequencies.reduce((prev, curr) =>
+    (Math.abs(curr - value) < Math.abs(prev - value) ? curr : prev)
+  );
+  return closest;
+}
+
+
+function findNextValid(direction) {
+  const text = newMsg.value.trim();
+
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  currentVelocityX = 0;
+
+  updateValidFrequencies(text, false);
+  if (validFrequencies.length === 0) return;
+
+  let currentIndex = validFrequencies.indexOf(currentFrequency);
+
+  if (currentIndex === -1) {
+    setDialPosition(currentFrequency, true, true);
+    currentIndex = validFrequencies.indexOf(currentFrequency);
+  }
+
+  let newIndex = currentIndex + direction;
+
+  if (newIndex < 0) newIndex = 0;
+  if (newIndex >= validFrequencies.length) newIndex = validFrequencies.length - 1;
+
+  const nextValidFreq = validFrequencies[newIndex];
+  if (nextValidFreq !== currentFrequency) {
+    setDialPosition(nextValidFreq, true, true);
+  }
+}
+
+
+function updateValidFrequencies(text, snapToFirst = true) {
+  validFrequencies = [];
+  if (text) {
+    for (let f = 1; f <= maxFrequency; f++) {
+      const testMsgs = [...messages, { text, frequency: f }];
+      const res = tryEncodeAll(testMsgs, false);
+      if (res.ok) {
+        validFrequencies.push(f);
+      }
+    }
+  } else {
+    for (let f = 1; f <= maxFrequency; f++) validFrequencies.push(f);
+  }
+
+  document.querySelectorAll('.dial-number').forEach(el => {
+    const val = parseInt(el.dataset.value, 10);
+    if (validFrequencies.length > 0 && !validFrequencies.includes(val)) {
+      el.classList.add('invalid');
+    } else {
+      el.classList.remove('invalid');
+    }
+  });
+
+  if (snapToFirst) {
+    const firstValid = validFrequencies.length > 0 ? validFrequencies[0] : 1;
+    setDialPosition(firstValid, true, true);
+  } else {
+    if (validFrequencies.includes(currentFrequency)) {
+      setDialPosition(currentFrequency, true, true);
+    } else {
+      setDialPosition(currentDialValue, true, true);
+    }
+  }
+}
+
+
+const damping = 0.95;
+const stopThreshold = 0.05;
+
+function startSpinAnimation() {
+  let lastFrameTime = performance.now();
+
+  function spin() {
+    const now = performance.now();
+    const deltaTime = now - lastFrameTime;
+    lastFrameTime = now;
+
+    if (Math.abs(currentVelocityX) < stopThreshold) {
+      currentVelocityX = 0;
+      animationFrameId = null;
+      setDialPosition(currentDialValue, true, true);
+      return;
+    }
+
+    currentVelocityX *= Math.pow(damping, deltaTime / 16.67);
+    const pixelsToMove = currentVelocityX * deltaTime;
+    let newValue = currentDialValue - (pixelsToMove / numberWidth);
+
+    if (newValue < 1 || newValue > maxFrequency) {
+      currentVelocityX = 0;
+      const clampedValue = Math.max(1, Math.min(maxFrequency, newValue));
+      animationFrameId = null;
+      setDialPosition(clampedValue, true, true);
+      return;
+    }
+
+    setDialPosition(newValue, false, false);
+    animationFrameId = requestAnimationFrame(spin);
+  }
+
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  animationFrameId = requestAnimationFrame(spin);
 }
 
 
 function activateTyping() {
   document.addEventListener('keydown', e => {
     const key = e.key;
+
+    if (document.activeElement === newMsg) {
+      if (key === 'ArrowLeft') {
+        e.preventDefault();
+        findNextValid(-1);
+        return;
+      }
+      if (key === 'ArrowRight') {
+        e.preventDefault();
+        findNextValid(1);
+        return;
+      }
+    }
+
     if (document.activeElement && document.activeElement.tagName === 'INPUT' && document.activeElement !== input) return;
+
     if (key === 'ArrowRight') {
       moveCursor(1);
       e.preventDefault();
@@ -244,19 +426,44 @@ function renderMessages() {
 }
 
 
+function rebuild() {
+  const res = tryEncodeAll(messages, true);
+  if (!res.ok) {
+    const originalText = addBtn.textContent;
+    addBtn.textContent = 'Nope';
+    setTimeout(() => {
+      addBtn.textContent = originalText;
+      addBtn.style.cssText = '';
+    }, 1200);
+    return false;
+  }
+  renderSheet();
+  cursorIndex = 0;
+  highlightCursor();
+
+  updateValidFrequencies(newMsg.value.trim(), false);
+  return true;
+}
+
+
 addBtn.addEventListener('click', () => {
   const text = newMsg.value.trim();
   if (!text) return;
 
-  let freq = parseInt(newFreq.value, 10);
-  if (!freq || freq < 1) {
-    freq = getFreq(text);
+  let freq = currentFrequency;
+
+  if (validFrequencies.length > 0 && !validFrequencies.includes(freq)) {
+    freq = findClosestValid(freq);
   }
 
-  if (!freq) {
-    addBtn.textContent = 'Failed';
-    setTimeout(() => (addBtn.textContent = 'Add'), 1200);
-    return;
+  if (!freq || freq < 1 || !validFrequencies.includes(freq)) {
+    const firstValid = validFrequencies.length > 0 ? validFrequencies[0] : 0;
+    if (!firstValid) {
+      addBtn.textContent = 'Failed';
+      setTimeout(() => (addBtn.textContent = 'Add'), 1200);
+      return;
+    }
+    freq = firstValid;
   }
 
   messages.push({ text, frequency: freq });
@@ -267,23 +474,9 @@ addBtn.addEventListener('click', () => {
 
   renderMessages();
   newMsg.value = '';
-  newFreq.value = '';
-  newFreq.placeholder = '';
+  updateValidFrequencies('', true);
   input.focus();
 });
-
-
-function rebuild() {
-  const res = tryEncodeAll(messages, true);
-  if (!res.ok) {
-    alert('Conflict');
-    return false;
-  }
-  renderSheet();
-  cursorIndex = 0;
-  highlightCursor();
-  return true;
-}
 
 
 function updateDisplayFromSheet() {
@@ -298,34 +491,103 @@ copyBtn.addEventListener('click', () => {
   const text = input.value;
   if (!text) return;
 
-  navigator.clipboard
-    .writeText(text)
-    .then(() => {
-      copyBtn.textContent = 'Copied';
-      setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
-    })
-    .catch(() => {
-      copyBtn.textContent = 'Error';
-      setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
-    });
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.top = '0';
+    textArea.style.left = '0';
+    textArea.style.opacity = 0;
+    document.body.appendChild(textArea);
+
+    textArea.focus();
+    textArea.select();
+
+    document.execCommand('copy');
+
+    document.body.removeChild(textArea);
+
+    copyBtn.textContent = 'Copied';
+    setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
+  } catch (err) {
+    console.error('Clipboard copy failed:', err);
+    copyBtn.textContent = 'Error';
+    setTimeout(() => (copyBtn.textContent = 'Copy'), 1200);
+  }
 });
 
 
 newMsg.addEventListener('input', () => {
   const text = newMsg.value.trim();
-  if (!text) {
-    newFreq.placeholder = '';
-    return;
-  }
-  const suggested = getFreq(text);
-  if (suggested) {
-    newFreq.placeholder = `${suggested}`;
-  } else {
-    newFreq.placeholder = 'X';
-  }
+  updateValidFrequencies(text, false);
 });
 
 
+frequencyDial.addEventListener('mousedown', e => {
+  e.preventDefault();
+
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  animationFrameId = null;
+
+  isDragging = true;
+  startX = e.clientX;
+
+  const transform = new DOMMatrix(getComputedStyle(dialWheel).transform);
+  startTranslateX = transform.m41;
+  dialWheel.style.transition = 'none';
+
+  lastMouseX = e.clientX;
+  lastMouseTime = performance.now();
+  currentVelocityX = 0;
+});
+
+
+document.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+
+  const now = performance.now();
+  const moveX = e.clientX;
+  const deltaTime = now - lastMouseTime;
+  const deltaMouse = moveX - lastMouseX;
+
+  if (deltaTime > 0) {
+    currentVelocityX = deltaMouse / deltaTime;
+  }
+
+  lastMouseX = moveX;
+  lastMouseTime = now;
+
+  const totalDeltaX = e.clientX - startX;
+  const newTranslate = startTranslateX + totalDeltaX;
+
+  const newValue = 1 + (dialCenterOffset - newTranslate) / numberWidth;
+  setDialPosition(newValue, false, false);
+});
+
+
+document.addEventListener('mouseup', e => {
+  if (!isDragging) return;
+  isDragging = false;
+
+  startSpinAnimation();
+});
+
+
+frequencyDial.addEventListener('wheel', e => {
+  e.preventDefault();
+
+  if (animationFrameId) cancelAnimationFrame(animationFrameId);
+  currentVelocityX = 0;
+
+  const direction = e.deltaY > 0 ? 1 : -1;
+  findNextValid(direction);
+});
+
+
+populateDial(maxFrequency);
+dialWidth = frequencyDial.offsetWidth;
+dialCenterOffset = (dialWidth / 2) - (numberWidth / 2);
+updateValidFrequencies('', true);
 renderSheet();
 activateTyping();
 highlightCursor();
