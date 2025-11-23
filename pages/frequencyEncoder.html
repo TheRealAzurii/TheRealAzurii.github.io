@@ -19,13 +19,19 @@
 
       <div class="message-input">
         <input type="text" id="new-message" autocapitalize="off" autocorrect="off" autocomplete="off">
-        <input type="number" id="new-frequency" min="1" max="100" autocapitalize="off" autocorrect="off" autocomplete="off">
+        
+        <div class="frequency-dial-container">
+          <div class="frequency-dial" id="frequency-dial">
+            <div class="dial-wheel" id="dial-wheel">
+            </div>
+          </div>
+        </div>
         <button id="add-message">Add</button>
       </div>
 
       <div class="messages-list" id="messages-list"></div>
       <button id="copy-text">Copy</button>
-      <div id="encoding-sheet" aria-label="Encoding sheet"></div>
+      <div id="encoding-sheet"></div>
     </div>
   </div>
 </body> <script src="../js/frequencyEncoder.js"></script>
