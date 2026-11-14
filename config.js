@@ -1,8 +1,8 @@
 const API = "https://welcome-messages.marta-8k2q.workers.dev";
 
-const INTRO = ["Welcome", "Thank you", "I have been lonely"];
+const INTRO = ["Welcome", "I thank you", "I have been lonely"];
 const TITLES = { click: "Click me", welcome: "Welcome", soon: "Soon" };
-const QUESTION = "Do you want to leave a message?";
+const QUESTION = "Anything to say?";
 const OUTRO = ["Sent", "I thank you again", "Goodbye"];
 
 const LIFE = 5000;
