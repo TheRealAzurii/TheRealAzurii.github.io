@@ -1,27 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/index.css">
-  <link rel="icon" type="image/x-icon" href="content/index/icon.png">
-  <title>Home</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Click me</title>
+<link rel="icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <div id="desktop"></div>
+  <h1 id="t" aria-hidden="true"></h1>
+  <div class="sr" id="sr" role="status" aria-live="polite"></div>
 
-  <div id="taskbar">
-    <div class="launcher-container">
-      <input type="text" id="launcher-input" autocapitalize="off" autocorrect="off" autocomplete="off">
-      <div class="launcher-suggestions" id="launcher-suggestions"></div>
+  <div id="term">
+    <div class="row">
+      <span aria-hidden="true"><span id="prompt"></span><span id="b"></span><span class="cur" id="c"></span><span id="a"></span></span>
+      <input id="in" type="text" maxlength="240" disabled autocomplete="off" autocapitalize="off"
+             autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Type your message and press Enter">
     </div>
-    
-    <div class="task-list" id="task-list"></div>
-    <div class="clock" id="clock">00:00</div>
   </div>
-</body> <script src="js/index.js"></script>
 
+<script src="config.js" defer></script>
+<script src="audio.js" defer></script>
+<script src="script.js" defer></script>
+</body>
 </html>
